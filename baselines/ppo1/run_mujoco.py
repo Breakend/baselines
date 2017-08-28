@@ -9,14 +9,15 @@ import sys
 import tensorflow as tf
 
 def train(env_id, num_timesteps, seed, policy_hid_size, vf_hid_size, activation_policy, activation_vf):
-    from baselines.pposgd import mlp_policy, pposgd_simple
+    from baselines.ppo1 import mlp_policy, pposgd_simple
     U.make_session(num_cpu=1).__enter__()
     set_global_seeds(seed)
     env = gym.make(env_id)
     def policy_fn(name, ob_space, ac_space):
         return mlp_policy.MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
             policy_hid_size=policy_hid_size, vf_hid_size=vf_hid_size, activation_policy=activation_policy, activation_vf=activation_vf)
-    env = bench.Monitor(env, osp.join(logger.get_dir(), "monitor.json"))
+    env = bench.Monitor(env, logger.get_dir() and 
+        osp.join(logger.get_dir(), "monitor.json"))
     env.seed(seed)
     gym.logger.setLevel(logging.WARN)
     pposgd_simple.learn(env, policy_fn, 
@@ -24,7 +25,7 @@ def train(env_id, num_timesteps, seed, policy_hid_size, vf_hid_size, activation_
             timesteps_per_batch=2048,
             clip_param=0.2, entcoeff=0.0,
             optim_epochs=10, optim_stepsize=3e-4, optim_batchsize=64,
-            gamma=0.99, lam=0.95,
+            gamma=0.99, lam=0.95, schedule='linear',
         )
     env.close()
 
