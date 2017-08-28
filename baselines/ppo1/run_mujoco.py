@@ -16,11 +16,11 @@ def train(env_id, num_timesteps, seed, policy_hid_size, vf_hid_size, activation_
     def policy_fn(name, ob_space, ac_space):
         return mlp_policy.MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
             policy_hid_size=policy_hid_size, vf_hid_size=vf_hid_size, activation_policy=activation_policy, activation_vf=activation_vf)
-    env = bench.Monitor(env, logger.get_dir() and 
+    env = bench.Monitor(env, logger.get_dir() and
         osp.join(logger.get_dir(), "monitor.json"))
     env.seed(seed)
     gym.logger.setLevel(logging.WARN)
-    pposgd_simple.learn(env, policy_fn, 
+    pposgd_simple.learn(env, policy_fn,
             max_timesteps=num_timesteps,
             timesteps_per_batch=2048,
             clip_param=0.2, entcoeff=0.0,
@@ -28,14 +28,6 @@ def train(env_id, num_timesteps, seed, policy_hid_size, vf_hid_size, activation_
             gamma=0.99, lam=0.95, schedule='linear',
         )
     env.close()
-
-
-def lrelu(x, leak=0.2, name="lrelu"):
-    """https://github.com/tensorflow/tensorflow/issues/4079"""  
-    with tf.variable_scope(name):
-        f1 = 0.5 * (1 + leak)
-        f2 = 0.5 * (1 - leak)
-        return f1 * x + f2 * tf.abs(x)
 
 def main():
     parser = argparse.ArgumentParser(description='PPO.')
@@ -46,7 +38,7 @@ def main():
     parser.add_argument("--activation_policy", type=str, default="tanh")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--log_dir", type=str, default="./logs/")
-    activation_map = { "relu" : tf.nn.relu, "leaky_relu" : lrelu, "tanh" :tf.nn.tanh}
+    activation_map = { "relu" : tf.nn.relu, "leaky_relu" : U.lrelu, "tanh" :tf.nn.tanh}
 
     args = parser.parse_args()
     logger.configure(dir=args.log_dir)

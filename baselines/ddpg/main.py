@@ -11,7 +11,7 @@ import baselines.ddpg.training as training
 from baselines.ddpg.models import Actor, Critic
 from baselines.ddpg.memory import Memory
 from baselines.ddpg.noise import *
-
+from baselines.common import tf_util as U
 import gym
 import tensorflow as tf
 from mpi4py import MPI
@@ -54,8 +54,11 @@ def run(env_id, seed, noise_type, layer_norm, evaluation, **kwargs):
 
     # Configure components.
     memory = Memory(limit=int(1e6), action_shape=env.action_space.shape, observation_shape=env.observation_space.shape)
-    critic = Critic(layer_norm=layer_norm)
-    actor = Actor(nb_actions, layer_norm=layer_norm)
+
+    activation_map = { "relu" : tf.nn.relu, "leaky_relu" : U.lrelu, "tanh" :tf.nn.tanh}
+
+    critic = Critic(layer_norm=layer_norm, hidden_sizes=kwargs["vf_size"], activation=activation_map[kwargs["activation_vf"]])
+    actor = Actor(nb_actions, layer_norm=layer_norm, hidden_sizes=kwargs["policy_size"], activation=activation_map[kwargs["activation_policy"]])
 
     # Seed everything to make things reproducible.
     seed = seed + 1000000 * rank
@@ -80,7 +83,7 @@ def run(env_id, seed, noise_type, layer_norm, evaluation, **kwargs):
 
 def parse_args():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
+
     parser.add_argument('--env-id', type=str, default='HalfCheetah-v1')
     boolean_flag(parser, 'render-eval', default=False)
     boolean_flag(parser, 'layer-norm', default=True)
@@ -102,6 +105,10 @@ def parse_args():
     parser.add_argument('--nb-eval-steps', type=int, default=100)  # per epoch cycle and MPI worker
     parser.add_argument('--nb-rollout-steps', type=int, default=100)  # per epoch cycle and MPI worker
     parser.add_argument('--noise-type', type=str, default='adaptive-param_0.2')  # choices are adaptive-param_xx, ou_xx, normal_xx, none
+    parser.add_argument("--policy_size", nargs="+", default=(64,64), type=int)
+    parser.add_argument("--vf_size", nargs="+", default=(64,64), type=int)
+    parser.add_argument("--activation_vf", type=str, default="relu")
+    parser.add_argument("--activation_policy", type=str, default="relu")
     boolean_flag(parser, 'evaluation', default=False)
     return vars(parser.parse_args())
 
