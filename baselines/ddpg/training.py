@@ -119,12 +119,13 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                     epoch_actor_losses.append(al)
                     agent.update_target_net()
 
-                # Evaluate.
-                eval_episode_rewards = []
-                eval_qs = []
-                if eval_env is not None:
-                    eval_episode_reward = 0.
-                    for t_rollout in range(nb_eval_steps):
+            # Evaluate.
+            eval_episode_rewards = []
+            eval_qs = []
+            if eval_env is not None:
+                eval_episode_reward = 0.
+                for i in range(10): # 5 rollouts
+                    while True:
                         eval_action, eval_q = agent.pi(eval_obs, apply_noise=False, compute_Q=True)
                         eval_obs, eval_r, eval_done, eval_info = eval_env.step(max_action * eval_action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
                         if render_eval:
@@ -137,6 +138,7 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                             eval_episode_rewards.append(eval_episode_reward)
                             eval_episode_rewards_history.append(eval_episode_reward)
                             eval_episode_reward = 0.
+                            break
 
             # Log stats.
             epoch_train_duration = time.time() - epoch_start_time
