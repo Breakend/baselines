@@ -55,7 +55,7 @@ def main():
     activation_policy = activation_map[args.activation_policy]
     activation_vf = activation_map[args.activation_vf]
 
-    train(args.task, 5e6, args.seed, args.policy_size, args.value_func_size, activation_policy,  activation_vf)
+    train(args.task, 2e6, args.seed, args.policy_size, args.value_func_size, activation_policy,  activation_vf)
 
 
 if __name__ == '__main__':

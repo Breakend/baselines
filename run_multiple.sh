@@ -18,8 +18,8 @@ fi
 
 num_experiments=$1
 parallel_exps=$2
-run_script=$3
-log_prefix=$4
+log_prefix=$3
+run_script=$4
 
 pickle_files=()
 
@@ -33,7 +33,7 @@ do
   do
     echo "Launching experiment $c"
     mkdir -p ./$log_prefix/exp_$c/
-    python3 $run_script --log_dir ./$log_prefix/exp_$c/ "${@:5}" &> ./$log_prefix/exp_$c.log &
+    python3 $run_script --seed $c --log_dir ./$log_prefix/exp_$c/ "${@:5}" &> ./$log_prefix/exp_$c.log &
     #pickle_files=("${pickle_files[@]}" "exp_$c.pickle")
     c=$((c+1))
   done
