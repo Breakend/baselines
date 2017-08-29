@@ -25,7 +25,7 @@ def train(env_id, num_timesteps, seed, policy_hid_size, vf_hid_size, activation_
             timesteps_per_batch=2048,
             clip_param=0.2, entcoeff=0.0,
             optim_epochs=10, optim_stepsize=3e-4, optim_batchsize=64,
-            gamma=0.99, lam=0.95, schedule='linear',
+            gamma=0.995, lam=0.97, schedule='constant',
         )
     env.close()
 
@@ -45,7 +45,7 @@ def main():
     activation_policy = activation_map[args.activation_policy]
     activation_vf = activation_map[args.activation_vf]
 
-    train(args.task, 1e6, args.seed, args.policy_size, args.value_func_size, activation_policy,  activation_vf)
+    train(args.task, 5e6, args.seed, args.policy_size, args.value_func_size, activation_policy,  activation_vf)
 
 
 if __name__ == '__main__':

@@ -113,7 +113,7 @@ def learn(env, policy_func, *,
     surr2 = U.clip(ratio, 1.0 - clip_param, 1.0 + clip_param) * atarg #
     pol_surr = - U.mean(tf.minimum(surr1, surr2)) # PPO's pessimistic surrogate (L^CLIP)
     vf_loss = U.mean(tf.square(pi.vpred - ret))
-    total_loss = pol_surr + pol_entpen + vf_loss
+    total_loss = pol_surr + pol_entpen + 1e2 * vf_loss # try to rescale the value function loss to make it learn faster.
     losses = [pol_surr, pol_entpen, vf_loss, meankl, meanent]
     loss_names = ["pol_surr", "pol_entpen", "vf_loss", "kl", "ent"]
 
@@ -155,7 +155,7 @@ def learn(env, policy_func, *,
         if schedule == 'constant':
             cur_lrmult = 1.0
         elif schedule == 'linear':
-            cur_lrmult =  max(1.0 - float(timesteps_so_far) / max_timesteps, 0)
+            cur_lrmult =  max(1.0 - float(timesteps_so_far) / max_timesteps, 1e-5)
         else:
             raise NotImplementedError
 
