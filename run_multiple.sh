@@ -5,7 +5,7 @@ die() { echo "$@" 1>&2 ; exit 1; }
 
 # TODO: make this proper usage script
 
-if [  $# -le 3 ]
+if [  $# -le 4 ]
 then
   die "Usage: bash $0 num_experiments num_experiments_in_parallel run_script [--all --other --args --to --run-script]"
 fi
@@ -19,10 +19,11 @@ fi
 num_experiments=$1
 parallel_exps=$2
 run_script=$3
+log_prefix=$4
 
 pickle_files=()
 
-mkdir -p ./logs/
+mkdir -p ./$log_prefix/
 
 trap 'jobs -p | xargs kill' EXIT
 
@@ -31,8 +32,8 @@ do
   for (( j=1; j<=$parallel_exps; j++ ))
   do
     echo "Launching experiment $c"
-    mkdir -p ./logs/exp_$c/
-    python3 $run_script --log_dir ./logs/exp_$c/ "${@:4}" &> ./logs/exp_$c.log &
+    mkdir -p ./$log_prefix/exp_$c/
+    python3 $run_script --log_dir ./$log_prefix/exp_$c/ "${@:5}" &> ./$log_prefix/exp_$c.log &
     #pickle_files=("${pickle_files[@]}" "exp_$c.pickle")
     c=$((c+1))
   done
